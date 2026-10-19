@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chúc Mừng Ngày 20/10</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #a8ede0 0%, #d4fc79 50%, #ff9a9e 100%);
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            color: #333333;
+            text-align: center;
+            position: relative;
+        }
+
+        /* Nút Bật/Tắt Âm Thanh */
+        .music-btn {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.75);
+            border: 2px solid #ffffff;
+            color: #ffffff;
+            font-size: 20px;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 999;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* Bảng theo dõi 7 linh hồn Undertale */
+        .soul-tracker {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            z-index: 999;
+            display: none;
+            gap: 8px;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .soul-slot {
+            font-size: 18px;
+            opacity: 0.25;
+            filter: grayscale(100%);
+            transition: all 0.3s ease;
+        }
+
+        .soul-slot.collected {
+            opacity: 1;
+            filter: grayscale(0%);
+            transform: scale(1.3);
+        }
+
+        /* Cụm hoa cố định ở góc */
+        .corner-flowers-top-left {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            display: flex;
+            gap: 6px;
+            font-size: 30px;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .corner-flowers-bottom-right {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            display: flex;
+            gap: 6px;
+            font-size: 30px;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .card-wrapper {
+            position: relative;
+            z-index: 10;
+            cursor: pointer;
+            width: 88vw;
+            max-width: 380px;
+        }
+
+        /* Hiệu ứng phong thư khi chờ mở */
+        .envelope {
+            width: 100%;
+            height: 220px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: float 3.5s ease-in-out infinite;
+            overflow: hidden;
+            transition: all 4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .envelope::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 120px;
+            background: #ffb6c1;
+            clip-path: polygon(0 0, 50% 100%, 100% 0);
+            z-index: 3;
+            transition: transform 4s cubic-bezier(0.25, 1, 0.5, 1), opacity 3s ease;
+        }
+
+        .envelope-seal {
+            position: absolute;
+            z-index: 4;
+            font-size: 2.5rem;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+            transition: all 3s ease;
+        }
+
+        .click-hint {
+            position: absolute;
+            bottom: -40px;
+            width: 100%;
+            left: 0;
+            color: #2c3e50;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        /* TRẠNG THÁI ĐANG MỞ: Phát sáng chậm chậm trong 4 giây */
+        .card-wrapper.opening .envelope {
+            transform: scale(1.15) rotate(2deg);
+            box-shadow: 0 0 50px rgba(255, 105, 180, 0.9), 0 0 100px rgba(255, 215, 0, 0.7);
+            filter: brightness(1.2);
+        }
+
+        .card-wrapper.opening .envelope::before {
+            transform: translateY(-120px) rotateX(90deg);
+            opacity: 0;
+        }
+
+        .card-wrapper.opening .envelope-seal {
+            transform: scale(2) translateY(-50px);
+            opacity: 0;
+        }
+
+        .card-wrapper.opening .click-hint {
+            opacity: 0;
+        }
+
+        /* NỘI DUNG THƯ: Xuất hiện từ từ sau 4s */
+        .container {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 25px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            display: none;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .card-wrapper.open .envelope { display: none; }
+        .card-wrapper.open .container {
+            display: block;
+            opacity: 1;
+            transform: scale(1);
+            animation: float 3.5s ease-in-out infinite;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            margin-bottom: 12px;
+            color: #d63031;
+        }
+
+        p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #2d3436;
+            margin-bottom: 12px;
+        }
+
+        .highlight { color: #e84393; font-weight: bold; }
+        .footer-text { font-size: 0.9rem; color: #0984e3; margin-top: 12px; font-weight: 600; }
+
+        .game-prompt-box {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 2px dashed rgba(214, 48, 49, 0.3);
+        }
+
+        .game-question {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 10px;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .game-btn {
+            background: #ff7675;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .game-btn.secondary { background: #b2bec3; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; transform: translateY(0); }
+            100% { opacity: 1; transform: translateY(-3px); }
+        }
+
+        .star {
+            position: fixed;
+            top: -50px;
+            z-index: 500;
+            pointer-events: none;
+            animation: fallStar linear forwards;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+        }
+
+        @keyframes fallStar {
+            0% { transform: translateY(0) rotate(0deg) scale(0.9); opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { transform: translateY(105vh) rotate(360deg) scale(1.1); opacity: 0; }
+        }
+
+        .secret-heart, .undertale-soul {
+            position: fixed;
+            top: -60px;
+            font-size: 34px; 
+            padding: 24px;   
+            cursor: pointer;
+            user-select: none;
+            z-index: 501;    
+            touch-action: manipulation;
+            animation: fallHeartSlow linear forwards;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            filter: drop-shadow(0 0 8px rgba(255, 105, 180, 0.8));
+        }
+        
+        .secret-heart:active, .undertale-soul:active { 
+            transform: scale(1.5); 
+        }
+
+        @keyframes fallHeartSlow {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 0.9; }
+            100% { transform: translateY(105vh) rotate(-180deg); opacity: 0; }
+        }
+
+        #undertale-dialogue {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 550px;
+            background: #000000;
+            border: 3px solid #ffffff;
+            border-radius: 6px;
+            padding: 12px;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            text-align: left;
+        }
+
+        .dialogue-content { display: flex; align-items: center; gap: 10px; }
+        .dialogue-soul { font-size: 24px; }
+        .dialogue-text {
+            font-family: 'Press Start 2P', monospace;
+            color: #ffffff;
+            font-size: 10px;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        #victory-banner {
+            position: fixed;
+            top: 65px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #ffff00;
+            color: #ffff00;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 9px;
+            padding: 8px 14px;
+            border-radius: 6px;
+            z-index: 999;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop>
+        <source src="https://vgmsite.com/soundtracks/undertale/juxedzpy/78%20SAVE%20The%20World.mp3" type="audio/mpeg">
+    </audio>
+
+    <audio id="victoryMusic" loop>
+        <source src="https://vgmsite.com/soundtracks/undertale/juxedzpy/87%20Hopes%20and%20Dreams.mp3" type="audio/mpeg">
+    </audio>
+
+    <audio id="soulSfx">
+        <source src="https://www.myinstants.com/media/sounds/undertale-determination.mp3" type="audio/mpeg">
+    </audio>
+
+    <button class="music-btn" id="musicBtn">🎵</button>
+
+    <div class="soul-tracker" id="soulTracker">
+        <span class="soul-slot" id="slot-0">❤️</span>
+        <span class="soul-slot" id="slot-1">🧡</span>
+        <span class="soul-slot" id="slot-2">💛</span>
+        <span class="soul-slot" id="slot-3">💚</span>
+        <span class="soul-slot" id="slot-4">🩵</span>
+        <span class="soul-slot" id="slot-5">💙</span>
+        <span class="soul-slot" id="slot-6">💜</span>
+    </div>
+
+    <div id="victory-banner">✨ YOU SAVED THE WORLD! ✨</div>
+
+    <div class="corner-flowers-top-left">🌿🍀</div>
+    <div class="corner-flowers-bottom-right">🌺🌹</div>
+
+    <div class="card-wrapper" id="cardWrapper">
+        <div class="envelope" id="envelope">
+            <div class="envelope-seal">🌟</div>
+            <div class="click-hint">✨ Chạm vào lá thư để mở ✨</div>
+        </div>
+
+        <div class="container">
+            <h1>Happy Women's Day! ✨💖</h1>
+            <p>Chúc <span class="highlight">My ngố</span> một ngày 20/10 thật nhiều niềm vui, luôn hạnh phúc bên gia đình và bạn bè, chúc My sắp tới sẽ đạt điểm cao trong các bạn kiểm tra và sớm khỏi bệnh nha !!!</p>
+            
+            <div class="game-prompt-box">
+                <div class="game-question">🎮 My có muốn tham gia thử thách thu thập các mảnh linh hồn không?</div>
+                <div class="btn-group">
+                    <button class="game-btn" id="joinGameBtn">Tham gia ngay ✨</button>
+                    <button class="game-btn secondary" id="refuseGameBtn">Từ chối 😢</button>
+                </div>
+            </div>
+
+            <p class="footer-text">✨ From N94 ✨</p>
+        </div>
+    </div>
+
+    <div id="undertale-dialogue">
+        <div class="dialogue-content">
+            <div class="dialogue-soul" id="boxSoul">❤️</div>
+            <div class="dialogue-text" id="boxText">You are filled with determination.</div>
+        </div>
+    </div>
+
+    <script>
+        const bgAudio = document.getElementById('bgMusic');
+        const victoryAudio = document.getElementById('victoryMusic');
+        const soulSfx = document.getElementById('soulSfx');
+        bgAudio.volume = 0.6;
+        victoryAudio.volume = 0.7;
+        soulSfx.volume = 0.9;
+
+        let isMuted = false;
+        let gameStarted = false;
+        let isOpening = false; // Chống bấm nhiều lần liên tục khi đang mở
+
+        function playBackgroundMusic() {
+            if (!isMuted) {
+                bgAudio.play().catch(e => console.log(e));
+            }
+        }
+
+        function playSoulSfx() {
+            if (!isMuted) {
+                soulSfx.currentTime = 0;
+                soulSfx.play().catch(e => console.log(e));
+            }
+        }
+
+        const musicBtn = document.getElementById('musicBtn');
+        musicBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            isMuted = !isMuted;
+            musicBtn.innerHTML = isMuted ? '🔇' : '🎵';
+            if (isMuted) {
+                bgAudio.pause();
+                victoryAudio.pause();
+                soulSfx.pause();
+            } else {
+                bgAudio.play();
+            }
+        });
+
+        // Xử lý mở thư chậm trong 4 giây kèm hiệu ứng phát sáng
+        const cardWrapper = document.getElementById('cardWrapper');
+        cardWrapper.addEventListener('click', () => {
+            if (isOpening || cardWrapper.classList.contains('open')) return;
+            
+            playBackgroundMusic();
+            isOpening = true;
+            cardWrapper.classList.add('opening');
+
+            // Sau đúng 4 giây (hiệu ứng phát sáng và mở phong thư từ từ) mới hiện nội dung bên trong
+            setTimeout(() => {
+                cardWrapper.classList.remove('opening');
+                cardWrapper.classList.add('open');
+            }, 4000);
+        });
+
+        const joinGameBtn = document.getElementById('joinGameBtn');
+        const refuseGameBtn = document.getElementById('refuseGameBtn');
+        const soulTracker = document.getElementById('soulTracker');
+
+        joinGameBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            playBackgroundMusic();
+            gameStarted = true;
+            soulTracker.style.display = 'flex';
+            document.querySelector('.game-prompt-box').style.display = 'none';
+            alert('✨ Thử thách bắt đầu! Hãy chạm vào các trái tim linh hồn rơi xuống màn hình nhé!');
+        });
+
+        refuseGameBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            alert('Ơ kìa, thử thách thú vị lắm mà! Thử bấm "Tham gia ngay" đi nào! 😄');
+        });
+
+        const starIcons = ['✨', '🌟', '⭐', '💫'];
+        function createStar() {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            star.innerHTML = starIcons[Math.floor(Math.random() * starIcons.length)];
+            star.style.left = Math.random() * window.innerWidth + 'px';
+            const duration = Math.random() * 2.5 + 2.5;
+            star.style.animationDuration = duration + 's';
+            star.style.fontSize = (Math.random() * 14 + 14) + 'px';
+            document.body.appendChild(star);
+            setTimeout(() => star.remove(), duration * 1000);
+        }
+        setInterval(createStar, 200);
+
+        function spawnSecretHeart() {
+            if (!gameStarted) return;
+            const heart = document.createElement('div');
+            heart.classList.add('secret-heart');
+            heart.innerHTML = '💖';
+            heart.style.left = Math.random() * (window.innerWidth - 60) + 'px';
+            const heartDuration = Math.random() * 4 + 13; 
+            heart.style.animationDuration = heartDuration + 's';
+            
+            heart.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                playSoulSfx();
+                alert('🌸 20/10 vui vẻ và hạnh phúc nha, đợi t nha mốt dẫn đi chơi tiếp 😎 !!!');
+                heart.remove();
+            });
+
+            document.body.appendChild(heart);
+            setTimeout(() => { if (heart.parentNode) heart.remove(); }, heartDuration * 1000);
+        }
+        setInterval(spawnSecretHeart, 8000);
+
+        const undertaleSouls = [
+            { id: 0, emoji: '❤️', text: 'You are filled with determination.' },
+            { id: 1, emoji: '🧡', text: 'You are filled with bravery.' },
+            { id: 2, emoji: '💛', text: 'You are filled with justice.' },
+            { id: 3, emoji: '💚', text: 'You are filled with kindness.' },
+            { id: 4, emoji: '🩵', text: 'You are filled with patience.' },
+            { id: 5, emoji: '💙', text: 'You are filled with integrity.' },
+            { id: 6, emoji: '💜', text: 'You are filled with perseverance.' }
+        ];
+
+        const collectedSouls = new Set();
+
+        function spawnUndertaleSoul() {
+            if (!gameStarted) return;
+            const soulData = undertaleSouls[Math.floor(Math.random() * undertaleSouls.length)];
+            
+            const soul = document.createElement('div');
+            soul.classList.add('undertale-soul');
+            soul.innerHTML = soulData.emoji;
+            soul.style.left = Math.random() * (window.innerWidth - 60) + 'px';
+            
+            const duration = Math.random() * 4 + 13; 
+            soul.style.animationDuration = duration + 's';
+
+            soul.addEventListener('click', (e) => {
+                e.stopPropagation();
+                playSoulSfx();
+                collectedSouls.add(soulData.id);
+                const slot = document.getElementById(`slot-${soulData.id}`);
+                if (slot) slot.classList.add('collected');
+
+                showUndertaleDialogue(soulData.emoji, soulData.text);
+                soul.remove();
+
+                if (collectedSouls.size === 7) {
+                    triggerHopesAndDreamsClimax();
+                }
+            });
+
+            document.body.appendChild(soul);
+            setTimeout(() => { if (soul.parentNode) soul.remove(); }, duration * 1000);
+        }
+        setInterval(spawnUndertaleSoul, 5000);
+
+        let dialogueTimeout = null;
+        function showUndertaleDialogue(emoji, text) {
+            const box = document.getElementById('undertale-dialogue');
+            const boxSoul = document.getElementById('boxSoul');
+            const boxText = document.getElementById('boxText');
+
+            boxSoul.innerHTML = emoji;
+            boxText.innerHTML = text;
+            box.style.display = 'block';
+
+            if (dialogueTimeout) clearTimeout(dialogueTimeout);
+            dialogueTimeout = setTimeout(() => {
+                box.style.display = 'none';
+            }, 4500);
+        }
+
+        function triggerHopesAndDreamsClimax() {
+            const banner = document.getElementById('victory-banner');
+            if (banner) banner.style.display = 'block';
+
+            bgAudio.pause();
+            if (!isMuted) {
+                victoryAudio.play().catch(e => console.log(e));
+            }
+        }
+    </script>
+</body>
+</html>
